@@ -7,6 +7,7 @@ const { title } = require('process');
  const app = express();
 const server = http.createServer(app);
 const io = socket(server);
+require('dotenv').config();
 
 const chess = new Chess();
 let players = {};
@@ -76,7 +77,7 @@ io.on('connection', (uniquesocket) => {
         }
     })
 })
-
-server.listen(3000, () => {
-    console.log('Server is running on port 3000')
-})
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
