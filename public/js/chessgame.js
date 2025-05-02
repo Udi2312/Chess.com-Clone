@@ -9,7 +9,12 @@ let playerRole = null;
 const renderBoard = () => {
     const board = chess.board();
     boardElement.innerHTML = ''; 
-    
+    board.forEach((row, rowIndex) => {
+        row.forEach((square , squareIndex) =>{
+            
+        })
+    }
+)
 }
 
 const handleMove = () => {
