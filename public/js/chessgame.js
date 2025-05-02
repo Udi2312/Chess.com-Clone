@@ -1,3 +1,4 @@
+
 const socket = io();
 const chess = new Chess();
 const boardElement = document.querySelector('.chessboard');
@@ -8,7 +9,7 @@ let playerRole = null;
 
 const renderBoard = () => {
     const board = chess.board();
-    
+    boardElement.innerHTML = ''
     board.forEach((row, rowIndex) => {
         row.forEach((square , squareIndex) =>{
             const squareElement = document.createElement('div');
@@ -18,7 +19,7 @@ const renderBoard = () => {
             if(square){
                 const pieceElement = document.createElement('div');
                 pieceElement.classList.add('piece', square.color === 'w' ? 'white' : 'black');
-                pieceElement.innerText = "";
+                pieceElement.innerText = getPieceUnicode(square);
                 pieceElement.draggable = playerRole === square.color;
 
                 pieceElement.addEventListener('dragstart', (e) => {
@@ -52,14 +53,67 @@ const renderBoard = () => {
         })
     }
 )
+if(playerRole === 'b'){
+    boardElement.classList.add('flipped');
+}
+else{
+    boardElement.classList.remove('flipped');
+}
+}
+const handleMove = (source, target) => {
+    const move = {
+        from: `${String.fromCharCode(97 + source.col)}${8 - source.row}`, 
+        to: `${String.fromCharCode(97 + target.col)}${8 - target.row}`,
+        promotion: 'q',
+    }
+    socket.emit('move', move);
 }
 
-const handleMove = () => {
+const getPieceUnicode = (piece) => {
+    const unicodePieces = {
+        'w': {
+            'p': '♙',
+            'r': '♖',
+            'n': '♘',
+            'b': '♗',
+            'q': '♕',
+            'k': '♔'
+        },
+        'b': {
+            'p': '♟',
+            'r': '♜',
+            'n': '♞',
+            'b': '♝',
+            'q': '♛',
+            'k': '♚'
+        }
+    };
+    return unicodePieces[piece.color][piece.type] || '';
+};
+socket.on('playerRole', (role) => {
+    playerRole = role;
+    renderBoard();
+})
 
-}
+socket.on('spectatorRole', () => {
+    playerRole = null;
+    renderBoard();
+})
 
-const getPieceUnicode = () =>{
+socket.on('boardState', (fen) => {
+    chess.load(fen);
+    renderBoard();
+})
 
-}
+socket.on('move', (move) => {
+    chess.move(move);
+    renderBoard();
+})
 
-renderBoard();
+socket.on('invalidMove', (move) => {
+    alert(`Invalid Move: ${move.from} to ${move.to}`);
+})
+
+socket.on('gameAlert', (message) => {
+    alert(message);
+});

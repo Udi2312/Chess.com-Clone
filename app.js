@@ -44,14 +44,25 @@ io.on('connection', (uniquesocket) => {
 
     uniquesocket.on('move',(move) =>{
         try{
-            if(chess.turn() ==="w" && uniquesocket.id === players.white) return;
-            if(chess.turn() ==="b" && uniquesocket.id === players.black) return;
+            if(chess.turn() ==="w" && uniquesocket.id !== players.white) return;
+            if(chess.turn() ==="b" && uniquesocket.id !== players.black) return;
 
             const result = chess.move(move);
             if(result){
                 currentplayer = chess.turn();
                 io.emit('move', move);
                 io.emit('boardState', chess.fen());
+
+                if (chess.in_checkmate()) {
+                    io.emit('gameAlert', 'Checkmate! Game over.');
+                } else if (chess.in_check()) {
+                    io.emit('gameAlert', 'Check!');
+                } else if (chess.in_draw()) {
+                    io.emit('gameAlert', 'Draw!');
+                }
+                else if (chess.in_stalemate()) {
+                    io.emit('gameAlert', 'Stalemate!');
+                }
             }
             else{
                 console.log("Invalid Move" , move);
