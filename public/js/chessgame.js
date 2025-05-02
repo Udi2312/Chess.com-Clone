@@ -117,3 +117,6 @@ socket.on('invalidMove', (move) => {
 socket.on('gameAlert', (message) => {
     alert(message);
 });
+socket.on('gameOver', (message) => {
+    alert(message);
+});

@@ -41,6 +41,11 @@ io.on('connection', (uniquesocket) => {
         else if(uniquesocket.id === players.black){
             delete players.black;
         }
+
+        if (!players.white && !players.black) {
+            chess.reset();
+            currentplayer = "w";
+        }
     })
 
     uniquesocket.on('move',(move) =>{
@@ -64,7 +69,16 @@ io.on('connection', (uniquesocket) => {
                 else if (chess.in_stalemate()) {
                     io.emit('gameAlert', 'Stalemate!');
                 }
+
+                
+            if (chess.game_over()) {
+                io.emit('gameOver', 'Game Over! Resetting the game...');
+                chess.reset();
+                currentplayer = "w";
+                players = {}; // Reset players too if you want to allow new ones
             }
+            }
+
             else{
                 console.log("Invalid Move" , move);
                 uniquesocket.emit('invalidMove', move);
